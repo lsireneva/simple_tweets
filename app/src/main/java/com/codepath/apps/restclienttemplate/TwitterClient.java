@@ -1,12 +1,28 @@
 package com.codepath.apps.restclienttemplate;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.codepath.apps.restclienttemplate.models.User;
+import com.codepath.apps.restclienttemplate.network.DeserializerDate;
+import com.codepath.apps.restclienttemplate.network.HomeTimelineCallback;
+import com.codepath.apps.restclienttemplate.network.NewPostTweetCallback;
+import com.codepath.apps.restclienttemplate.network.NewTweetRequest;
+import com.codepath.apps.restclienttemplate.network.UserCredentialsCallback;
 import com.codepath.oauth.OAuthBaseClient;
 import com.github.scribejava.apis.TwitterApi;
 import com.github.scribejava.core.builder.api.BaseApi;
-import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.TextHttpResponseHandler;
+
+import java.util.ArrayList;
+import java.util.Date;
+
+import cz.msebera.android.httpclient.Header;
 
 /*
  * 
@@ -40,23 +56,84 @@ public class TwitterClient extends OAuthBaseClient {
 				String.format(REST_CALLBACK_URL_TEMPLATE, context.getString(R.string.intent_host),
 						context.getString(R.string.intent_scheme), context.getPackageName(), FALLBACK_URL));
 	}
-	// CHANGE THIS
-	// DEFINE METHODS for different API endpoints here
-	public void getHomeTimeline(AsyncHttpResponseHandler handler) {
+
+	public void getHomeTimeline(final HomeTimelineCallback callback) {
 		String apiUrl = getApiUrl("statuses/home_timeline.json");
-		// Can specify query string params directly or through RequestParams.
+
 		RequestParams params = new RequestParams();
 		params.put("count", 25);
 		params.put("since_id", 1);
-		client.get(apiUrl, params, handler);
+		Log.d ("DEBUG", "params"+params);
+
+		client.get(apiUrl, params, new TextHttpResponseHandler() {
+			@Override
+			public void onSuccess(int statusCode, Header[] headers, String responseString) {
+				Gson gson = new GsonBuilder()
+						.registerTypeAdapter(Date.class, new DeserializerDate())
+						.create();
+				ArrayList<Tweet> tweets = gson.fromJson(responseString,
+						new TypeToken<ArrayList<Tweet>>() {
+						}.getType());
+				Log.d ("DEBUG", "tweets"+tweets);
+				callback.onSuccess(tweets);
+			}
+
+			@Override
+			public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+				callback.onError(new Error(throwable != null ? throwable.getMessage() : null));
+			}
+		});
 	}
 
-	/* 1. Define the endpoint URL with getApiUrl and pass a relative path to the endpoint
-	 * 	  i.e getApiUrl("statuses/home_timeline.json");
-	 * 2. Define the parameters to pass to the request (query or body)
-	 *    i.e RequestParams params = new RequestParams("foo", "bar");
-	 * 3. Define the request method and make a call to the client
-	 *    i.e client.get(apiUrl, params, handler);
-	 *    i.e client.post(apiUrl, params, handler);
-	 */
+	public void getUserCredentials(final UserCredentialsCallback callback) {
+		String apiUrl = getApiUrl("account/verify_credentials.json");
+
+		RequestParams params = new RequestParams();
+
+		client.get(apiUrl, params, new TextHttpResponseHandler() {
+			@Override
+			public void onSuccess(int statusCode, Header[] headers, String responseString) {
+				Gson gson = gson = new GsonBuilder().create();
+				User user = gson.fromJson(responseString, User.class);
+				callback.onSuccess(user);
+			}
+
+			@Override
+			public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+				callback.onError(new Error(throwable != null ? throwable.getMessage() : null));
+			}
+		});
+
+	}
+
+	//Create new post
+
+	public void postNewTweet(NewTweetRequest request, final NewPostTweetCallback callback) {
+		String apiUrl = getApiUrl("statuses/update.json");
+
+		RequestParams params = new RequestParams();
+		if (request != null) {
+			if (request.getStatus() != null && !"".equals(request.getStatus())) {
+				params.put("status", request.getStatus());
+			}
+		}
+
+		client.post(apiUrl, params, new TextHttpResponseHandler() {
+			@Override
+			public void onSuccess(int statusCode, Header[] headers, String responseString) {
+				Gson gson = new GsonBuilder()
+						.registerTypeAdapter(Date.class, new DeserializerDate())
+						.create();
+				Tweet tweet = gson.fromJson(responseString, Tweet.class);
+				callback.onSuccess(tweet);
+			}
+
+			@Override
+			public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+				callback.onError(new Error(throwable != null ? throwable.getMessage() : null));
+			}
+		});
+	}
+
+
 }

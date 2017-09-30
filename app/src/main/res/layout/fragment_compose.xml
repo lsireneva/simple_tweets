@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/userInfoContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:layout_marginLeft="7dp">
+
+
+        <ImageView
+            android:id="@+id/ivProfileImage"
+            android:layout_width="@dimen/profile_image_size"
+            android:layout_height="@dimen/profile_image_size"/>
+
+        <TextView
+            android:id="@+id/tvUserName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="7dp"
+            android:layout_toRightOf="@+id/ivProfileImage"/>
+
+        <TextView
+            android:id="@+id/tvScreenName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="7dp"
+            android:layout_toRightOf="@+id/ivProfileImage"
+            android:layout_below="@+id/tvUserName"/>
+
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/btnClose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/etTweetText"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/ic_close"
+        tools:ignore="UnknownId" />
+
+
+    <EditText
+        android:id="@+id/etTweetText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/userInfoContainer"
+        android:maxLines="10"/>
+
+
+    <Button
+        android:id="@+id/btnComposeNewTweet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/etTweetText"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="14dp"
+        android:text="Tweet" />
+
+</RelativeLayout>
