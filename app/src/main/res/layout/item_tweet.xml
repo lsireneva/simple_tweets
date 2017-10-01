@@ -50,5 +50,7 @@
         android:layout_below="@+id/useNameContainer"
         android:layout_marginLeft="5dp"
         android:layout_toEndOf="@+id/ivProfileImage"
-        android:text="TextView" />
+        android:text="TextView"
+        android:autoLink="all"
+        android:linksClickable="true"/>
 </RelativeLayout>

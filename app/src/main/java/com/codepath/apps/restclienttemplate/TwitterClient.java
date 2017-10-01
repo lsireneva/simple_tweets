@@ -7,6 +7,7 @@ import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.apps.restclienttemplate.models.User;
 import com.codepath.apps.restclienttemplate.network.DeserializerDate;
 import com.codepath.apps.restclienttemplate.network.HomeTimelineCallback;
+import com.codepath.apps.restclienttemplate.network.HomeTimelineRequest;
 import com.codepath.apps.restclienttemplate.network.NewPostTweetCallback;
 import com.codepath.apps.restclienttemplate.network.NewTweetRequest;
 import com.codepath.apps.restclienttemplate.network.UserCredentialsCallback;
@@ -57,12 +58,25 @@ public class TwitterClient extends OAuthBaseClient {
 						context.getString(R.string.intent_scheme), context.getPackageName(), FALLBACK_URL));
 	}
 
-	public void getHomeTimeline(final HomeTimelineCallback callback) {
+	public void getHomeTimeline(HomeTimelineRequest request,  final HomeTimelineCallback callback) {
 		String apiUrl = getApiUrl("statuses/home_timeline.json");
 
-		RequestParams params = new RequestParams();
+		/*RequestParams params = new RequestParams();
 		params.put("count", 25);
-		params.put("since_id", 1);
+		params.put("since_id", 1);*/
+
+		//Log.d ("DEBUG", "params"+params);
+
+		RequestParams params = new RequestParams();
+		if (request != null) {
+			params.put("count", request.getCount());
+			if (request.getSinceId() != null) {
+				params.put("since_id", request.getSinceId());
+			}
+			if (request.getMaxId() != null) {
+				params.put("max_id", request.getMaxId());
+			}
+		}
 		Log.d ("DEBUG", "params"+params);
 
 		client.get(apiUrl, params, new TextHttpResponseHandler() {

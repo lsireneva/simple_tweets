@@ -1,5 +1,6 @@
 package com.codepath.apps.restclienttemplate.activites;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
@@ -18,7 +19,9 @@ import com.codepath.apps.restclienttemplate.fragments.NewTweetDialogFragment;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.apps.restclienttemplate.models.User;
 import com.codepath.apps.restclienttemplate.network.HomeTimelineCallback;
+import com.codepath.apps.restclienttemplate.network.HomeTimelineRequest;
 import com.codepath.apps.restclienttemplate.network.UserCredentialsCallback;
+import com.codepath.apps.restclienttemplate.utils.EndlessRecyclerViewScrollListener;
 
 import org.parceler.Parcels;
 
@@ -60,17 +63,44 @@ public class TimelineActivity extends AppCompatActivity implements NewTweetDialo
         //init the ArrayList or data source
         mTweets = new ArrayList<>();
         //construct the adapter from the data source
-        tweetAdapter = new TweetAdapter(mTweets);
+        tweetAdapter = new TweetAdapter(mTweets, new TweetAdapter.OnTweetAdapterListener() {
+            @Override
+            public void selectedTweet(Tweet tweet) {
+                openTweetDetails(tweet);
+            }
+        });
         //setup RecyclerView (layout manager, use adapter)
         mLayoutManager = new LinearLayoutManager(this);
         rvTweets.setLayoutManager(mLayoutManager);
         rvTweets.setHasFixedSize(true);
         //set adapter
         rvTweets.setAdapter(tweetAdapter);
+        EndlessRecyclerViewScrollListener endlessListener = new EndlessRecyclerViewScrollListener(mLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                Log.d("DEBUG", "loading page=: " + String.valueOf(page));
+                loadTimeline(null, mTweets.get(totalItemsCount - 1).getTweetId());
+
+            }
+        };
+        rvTweets.addOnScrollListener(endlessListener);
         mTwitterClient = TwitterApplication.getRestClient();
-        loadTimeline();
+        //loadTimeline();
 
+        if (!mTweets.isEmpty()) {
+            tweetAdapter.notifyDataSetChanged(mTweets);
+        } else {
 
+            loadTimeline(null,  null);}
+    }
+
+    private void openTweetDetails(Tweet tweet) {
+        Intent intent = new Intent(TimelineActivity.this, TweetDetailActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("tweet", Parcels.wrap(tweet));
+        intent = intent.putExtras(bundle);
+
+        startActivity(intent);
     }
 
     private void loadUserCredentials () {
@@ -93,22 +123,26 @@ public class TimelineActivity extends AppCompatActivity implements NewTweetDialo
         });
     }
 
-    private void loadTimeline() {
+    private void loadTimeline(Long sinceID, Long maxID) {
         Toast.makeText(TimelineActivity.this, "Loading tweets", Toast.LENGTH_SHORT).show();
+        HomeTimelineRequest request = new HomeTimelineRequest();
+        request.setSinceId(sinceID);
+        request.setMaxId(maxID);
 
-        mTwitterClient.getHomeTimeline(new HomeTimelineCallback() {
+        mTwitterClient.getHomeTimeline(request, new HomeTimelineCallback() {
             @Override
             public void onSuccess(ArrayList<Tweet> tweets) {
                 // Save in local database
                 //saveTweets(tweets);
 
                 // Process tweets
-                if (tweets != null) {
-                    if (mTweets == null) {
+                if (!tweets.isEmpty()) {
+                    if (mTweets.isEmpty()) {
                         mTweets = new ArrayList<>();
                     }
                     mTweets.addAll(tweets);
-                    tweetAdapter.notifyDataSetChanged();
+                    Log.d ("DEBUG", "mTweets"+mTweets);
+                    tweetAdapter.notifyDataSetChanged(mTweets);
                 }
             }
 
@@ -122,7 +156,7 @@ public class TimelineActivity extends AppCompatActivity implements NewTweetDialo
     @Override
     public void onTimeLineChanged(Tweet tweet) {
         mTweets.add(0, tweet);
-        tweetAdapter.notifyDataSetChanged();
+        tweetAdapter.notifyDataSetChanged(mTweets);
         mLayoutManager.scrollToPosition(0);
 
     }
