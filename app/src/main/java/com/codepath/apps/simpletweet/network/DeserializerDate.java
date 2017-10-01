@@ -1,4 +1,4 @@
-package com.codepath.apps.restclienttemplate.network;
+package com.codepath.apps.simpletweet.network;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;

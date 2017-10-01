@@ -1,4 +1,4 @@
-package com.codepath.apps.restclienttemplate.network;
+package com.codepath.apps.simpletweet.network;
 
 /**
  * Created by luba on 9/29/17.

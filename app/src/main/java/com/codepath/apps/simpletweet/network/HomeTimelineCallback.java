@@ -1,6 +1,6 @@
-package com.codepath.apps.restclienttemplate.network;
+package com.codepath.apps.simpletweet.network;
 
-import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.codepath.apps.simpletweet.models.Tweet;
 
 import java.util.ArrayList;
 

@@ -1,12 +1,12 @@
-package com.codepath.apps.restclienttemplate.activities;
+package com.codepath.apps.simpletweet.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 
-import com.codepath.apps.restclienttemplate.R;
-import com.codepath.apps.restclienttemplate.network.TwitterClient;
+import com.codepath.apps.simpletweet.R;
+import com.codepath.apps.simpletweet.network.TwitterClient;
 import com.codepath.oauth.OAuthLoginActionBarActivity;
 
 public class LoginActivity extends OAuthLoginActionBarActivity<TwitterClient> {

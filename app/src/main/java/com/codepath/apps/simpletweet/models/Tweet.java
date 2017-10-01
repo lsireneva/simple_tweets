@@ -1,30 +1,47 @@
-package com.codepath.apps.restclienttemplate.models;
+package com.codepath.apps.simpletweet.models;
 
 import android.text.format.DateUtils;
 
+import com.codepath.apps.simpletweet.MyDatabase;
 import com.google.gson.annotations.SerializedName;
+import com.raizlabs.android.dbflow.annotation.Column;
+import com.raizlabs.android.dbflow.annotation.ForeignKey;
+import com.raizlabs.android.dbflow.annotation.PrimaryKey;
+import com.raizlabs.android.dbflow.annotation.Table;
+import com.raizlabs.android.dbflow.sql.language.Select;
+import com.raizlabs.android.dbflow.structure.BaseModel;
 
 import org.parceler.Parcel;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
  * Created by luba on 9/27/17.
  */
-@Parcel
-public class Tweet {
+@Parcel(analyze={Tweet.class})
+@Table(database = MyDatabase.class, name = "Tweet_Table")
+public class Tweet extends BaseModel{
 
     @SerializedName("text")
+    @Column(name = "text")
     String text;
+
     @SerializedName("id")
-    Long uid;
+    @Column(name = "tweetId")
+    @PrimaryKey
+    Long tweetId;
 
     @SerializedName("user")
+    @Column
+    @ForeignKey(saveForeignKeyModel = false)
     public User user;
 
+
     @SerializedName("created_at")
+    @Column(name = "created_at")
     Date createdAt;
 
     public Tweet() {
@@ -33,11 +50,11 @@ public class Tweet {
 
 
     public Long getTweetId() {
-        return uid;
+        return tweetId;
     }
 
     public void setTweetId(Long tweetId) {
-        this.uid = tweetId;
+        this.tweetId = tweetId;
     }
 
     public String getText() {
@@ -90,21 +107,15 @@ public class Tweet {
     }
 
 
+    // Record Finders
+    public static Tweet byTweetId(Long tweetId) {
+        return new Select().from(Tweet.class).where(Tweet_Table.tweetId.eq(tweetId)).querySingle();
+    }
+
+    public static List<Tweet> recentTweets() {
+        return new Select().from(Tweet.class).orderBy(Tweet_Table.tweetId, false).limit(300).queryList();
+    }
 
 
-
-    //deserialize the Json
-    /*public static Tweet fromJson(JSONObject jsonObject) throws JSONException{
-        Tweet tweet = new Tweet();
-
-        //exrtact the values from Json
-        tweet.body = jsonObject.getString("text");
-        tweet.uid = jsonObject.getLong("id");
-        tweet.createdAt = jsonObject.getString("created_at");
-        //tweet.user = User.fromJson(jsonObject.getJSONObject("user"));
-        //tweet.user = User
-
-        return tweet;
-    }*/
 
 }

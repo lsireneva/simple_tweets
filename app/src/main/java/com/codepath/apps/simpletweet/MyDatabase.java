@@ -1,8 +1,9 @@
-package com.codepath.apps.restclienttemplate;
+package com.codepath.apps.simpletweet;
 
 import com.raizlabs.android.dbflow.annotation.Database;
 
 @Database(name = MyDatabase.NAME, version = MyDatabase.VERSION)
+
 public class MyDatabase {
 
     public static final String NAME = "RestClientDatabase";

@@ -1,6 +1,6 @@
-package com.codepath.apps.restclienttemplate.network;
+package com.codepath.apps.simpletweet.network;
 
-import com.codepath.apps.restclienttemplate.models.User;
+import com.codepath.apps.simpletweet.models.User;
 
 /**
  * Created by luba on 9/27/17.

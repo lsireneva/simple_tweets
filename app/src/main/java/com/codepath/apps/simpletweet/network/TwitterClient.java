@@ -1,11 +1,11 @@
-package com.codepath.apps.restclienttemplate.network;
+package com.codepath.apps.simpletweet.network;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.codepath.apps.restclienttemplate.R;
-import com.codepath.apps.restclienttemplate.models.Tweet;
-import com.codepath.apps.restclienttemplate.models.User;
+import com.codepath.apps.simpletweet.R;
+import com.codepath.apps.simpletweet.models.Tweet;
+import com.codepath.apps.simpletweet.models.User;
 import com.codepath.oauth.OAuthBaseClient;
 import com.github.scribejava.apis.TwitterApi;
 import com.github.scribejava.core.builder.api.BaseApi;

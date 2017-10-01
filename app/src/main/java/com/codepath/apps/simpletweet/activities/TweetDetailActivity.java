@@ -1,9 +1,9 @@
-package com.codepath.apps.restclienttemplate.activities;
+package com.codepath.apps.simpletweet.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.codepath.apps.restclienttemplate.R;
+import com.codepath.apps.simpletweet.R;
 
 public class TweetDetailActivity extends AppCompatActivity {
 
