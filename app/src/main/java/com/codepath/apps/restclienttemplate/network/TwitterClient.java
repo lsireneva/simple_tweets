@@ -1,16 +1,11 @@
-package com.codepath.apps.restclienttemplate;
+package com.codepath.apps.restclienttemplate.network;
 
 import android.content.Context;
 import android.util.Log;
 
+import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.apps.restclienttemplate.models.User;
-import com.codepath.apps.restclienttemplate.network.DeserializerDate;
-import com.codepath.apps.restclienttemplate.network.HomeTimelineCallback;
-import com.codepath.apps.restclienttemplate.network.HomeTimelineRequest;
-import com.codepath.apps.restclienttemplate.network.NewPostTweetCallback;
-import com.codepath.apps.restclienttemplate.network.NewTweetRequest;
-import com.codepath.apps.restclienttemplate.network.UserCredentialsCallback;
 import com.codepath.oauth.OAuthBaseClient;
 import com.github.scribejava.apis.TwitterApi;
 import com.github.scribejava.core.builder.api.BaseApi;
