@@ -27,6 +27,7 @@ public class TweetAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     public interface OnTweetAdapterListener {
         void selectedTweet(Tweet tweet);
+        void replySelectedTweet(Tweet tweet);
     }
 
 
@@ -54,6 +55,7 @@ public class TweetAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 
+
         switch (holder.getItemViewType()) {
             case TWEET:
                 ((TweetViewHolder) holder).setupTweetView(mTweets.get(position));
@@ -65,19 +67,14 @@ public class TweetAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     //create ViewHolder class
     @Override
     public int getItemCount() {
-        return mTweets.size();
+        return this.mTweets != null ? this.mTweets.size() : 0;
     }
 
     @Override
     public int getItemViewType(int position) {
         Tweet tweet = mTweets.get(position);
-        /*if (tweet.hasVideo()) {
-            return VIDEO_TWEET;
-        } else if (tweet.hasPhoto()) {
-            return PHOTO_TWEET;
-        } else {*/
-            return TWEET;
-        //}
+        return TWEET;
+
     }
 
     public void notifyDataSetChanged(ArrayList<Tweet> tweets) {
@@ -92,6 +89,8 @@ public class TweetAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         public TextView tvUsername;
         public TextView tvBody;
         public TextView tvCreatedAt;
+        public  TextView tvName;
+        public ImageView btnReply;
 
         public TweetViewHolder(View itemView) {
             super(itemView);
@@ -101,6 +100,8 @@ public class TweetAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             tvUsername = (TextView) itemView.findViewById(R.id.tvUserName);
             tvBody = (TextView) itemView.findViewById(R.id.tvBody);
             tvCreatedAt = (TextView) itemView.findViewById(R.id.tvTimestamp);
+            tvName = (TextView) itemView.findViewById(R.id.tvName);
+            btnReply = (ImageView) itemView.findViewById(R.id.btnReply);
 
 
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -112,6 +113,13 @@ public class TweetAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             });
 
+            btnReply.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mListener != null) mListener.replySelectedTweet(tweet);
+                }
+            });
+
 
         }
 
@@ -119,7 +127,8 @@ public class TweetAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             this.tweet = tweet;
 
             //populate the views according to these data
-            tvUsername.setText(tweet.user.name);
+            tvUsername.setText(tweet.getUser().getName());
+            tvName.setText(tweet.getUser().getScreennameToShow());
             tvBody.setText(tweet.getText());
 
             tvCreatedAt.setText(tweet.getRelativeTimeAgo());

@@ -2,6 +2,7 @@ package com.codepath.apps.simpletweet.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -9,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -43,6 +45,9 @@ public class TimelineActivity extends AppCompatActivity implements NewTweetDialo
     private LinearLayoutManager mLayoutManager;
     DividerItemDecoration mDividerItemDecoration;
     private SwipeRefreshLayout swipeContainer;
+    protected Toolbar toolbar;
+    protected AppBarLayout appBarLayout;
+
 
 
 
@@ -82,9 +87,9 @@ public class TimelineActivity extends AppCompatActivity implements NewTweetDialo
                 FragmentManager fm = getSupportFragmentManager();
                 Bundle bundle = new Bundle();
                 bundle.putParcelable("user", Parcels.wrap(mUserInfo));
-                NewTweetDialogFragment frag = new NewTweetDialogFragment();
-                frag.setArguments(bundle);
-                frag.show(fm, "compose_tweet");
+                NewTweetDialogFragment fragment = new NewTweetDialogFragment();
+                fragment.setArguments(bundle);
+                fragment.show(fm, "compose_tweet");
             }
         });
 
@@ -136,6 +141,26 @@ public class TimelineActivity extends AppCompatActivity implements NewTweetDialo
 
     private void setupUI() {
         mTwitterClient = TwitterApplication.getRestClient();
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            getSupportActionBar().setLogo(R.drawable.ic_twitter);
+            /*if (getSupportActionBar() != null) {
+                if (!isTaskRoot()) {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setDisplayShowHomeEnabled(true);
+                }
+            }
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });*/
+            appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+        }
+
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
         fabCompose = (FloatingActionButton) findViewById(R.id.fabCompose);
         //find the RecyclerView
@@ -147,6 +172,25 @@ public class TimelineActivity extends AppCompatActivity implements NewTweetDialo
             @Override
             public void selectedTweet(Tweet tweet) {
                 openTweetDetails(tweet);
+
+            }
+
+            @Override
+            public void replySelectedTweet(Tweet tweet) {
+                Log.d("DEBUG", "replyselectedtweet"+tweet);
+
+                if (CheckNetwork.isOnline()) {
+                    FragmentManager fm = getSupportFragmentManager();
+                    NewTweetDialogFragment fragment = NewTweetDialogFragment.newInstance(tweet);
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable("user", Parcels.wrap(mUserInfo));
+                    bundle.putParcelable("tweet", Parcels.wrap(tweet));
+                    fragment.setArguments(bundle);
+                    fragment.show(fm, "compose_tweet");
+                } else {
+                    Toast.makeText(TimelineActivity.this, getString(Integer.parseInt("No internet connection")), Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
         //setup RecyclerView (layout manager, use adapter)
@@ -168,13 +212,45 @@ public class TimelineActivity extends AppCompatActivity implements NewTweetDialo
         }
     }
 
+
     private void openTweetDetails(Tweet tweet) {
+        Log.d ("DEBUG", "openTweetDetails"+tweet);
         Intent intent = new Intent(TimelineActivity.this, TweetDetailActivity.class);
         Bundle bundle = new Bundle();
         bundle.putParcelable("tweet", Parcels.wrap(tweet));
+        bundle.putParcelable("user", Parcels.wrap(mUserInfo));
         intent = intent.putExtras(bundle);
+        startActivityForResult(intent, TweetDetailActivity.REQUEST_CODE);
 
-        startActivity(intent);
+        //startActivity(intent);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d ("DEBUG", "onActivityResult");
+        if (requestCode == TweetDetailActivity.REQUEST_CODE) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                Tweet tweet = Parcels.unwrap(data.getExtras().getParcelable(TweetDetailActivity.TWEET));
+                updateTweetInAdapter(tweet);
+
+                boolean refreshTweets = data.getExtras().getBoolean(TweetDetailActivity.REFRESH_TWEETS);
+                if (refreshTweets) {
+                    loadTimeline(null, null);
+                }
+            }
+        }
+    }
+
+    private void updateTweetInAdapter(Tweet tweet) {
+        if (mTweets != null) {
+            if (mTweets.indexOf(tweet) != -1) {
+                int index = mTweets.indexOf(tweet);
+                mTweets.set(index, tweet);
+                tweetAdapter.notifyItemChanged(index);
+            }
+            rvTweets.scrollToPosition(0);
+        }
     }
 
     private void loadUserCredentials () {

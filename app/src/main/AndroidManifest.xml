@@ -34,8 +34,12 @@
                     android:scheme="@string/intent_scheme" />
             </intent-filter>
         </activity>
-        <activity android:name="com.codepath.apps.simpletweet.activities.TimelineActivity" />
-        <activity android:name="com.codepath.apps.simpletweet.activities.TweetDetailActivity"></activity>
+        <activity
+            android:name="com.codepath.apps.simpletweet.activities.TimelineActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="com.codepath.apps.simpletweet.activities.TweetDetailActivity"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

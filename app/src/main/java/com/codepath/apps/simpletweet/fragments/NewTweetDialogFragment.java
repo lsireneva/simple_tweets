@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,11 +38,12 @@ public class NewTweetDialogFragment extends DialogFragment {
 
     Button btnComposeNewTweet;
     ImageView mProfileImage;
-    TextView mUserName, mScreenName, mCounter;
+    TextView mUserName, mScreenName, mCounter, mReply;
     private User mUser = new User();
     ImageView btnClose;
     EditText etStatus;
     private String mStatus;
+    private Tweet mTweet;
 
     public interface OnNewTweetDialogFragmentListener {
 
@@ -53,8 +55,15 @@ public class NewTweetDialogFragment extends DialogFragment {
 
     public NewTweetDialogFragment () {}
 
-    public static NewTweetDialogFragment newInstance() {
-        return new NewTweetDialogFragment();
+    //public static NewTweetDialogFragment newInstance() {
+     //   return new NewTweetDialogFragment();
+    //}
+
+    public static NewTweetDialogFragment newInstance(Tweet tweet) {
+        NewTweetDialogFragment fragment = new NewTweetDialogFragment();
+        Bundle args = new Bundle();
+        args.putParcelable("tweet", Parcels.wrap(tweet));
+        return fragment;
     }
 
     @Override
@@ -62,6 +71,8 @@ public class NewTweetDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mUser = (User) Parcels.unwrap(getArguments().getParcelable("user"));
+            mTweet = (Tweet) Parcels.unwrap(getArguments().getParcelable("tweet"));
+            Log.d("DEBUG", "mTweet != null"+mTweet);
         }
 
     }
@@ -95,6 +106,8 @@ public class NewTweetDialogFragment extends DialogFragment {
         mScreenName = (TextView) view.findViewById(R.id.tvScreenName);
         etStatus = (EditText) view.findViewById(R.id.etTweetText);
         mCounter = (TextView) view.findViewById(R.id.tvCounter);
+        mReply = (TextView) view.findViewById(R.id.tvReply);
+
 
         if (mUser != null) {
 
@@ -104,9 +117,19 @@ public class NewTweetDialogFragment extends DialogFragment {
 
         }
 
+        if (mTweet != null) {
+            Log.d("DEBUG", "mTweet != null"+mTweet);
+            mReply.setText(getString(R.string.in_reply_to, mTweet.getUser().getScreennameToShow()));
+            mReply.setVisibility(View.VISIBLE);
+        } else {
+            mReply.setVisibility(View.GONE);
+        }
+
+        mCounter.setText(getResources().getString(R.string.tweet_limit));
         etStatus.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
 
             }
 
@@ -139,31 +162,42 @@ public class NewTweetDialogFragment extends DialogFragment {
         btnComposeNewTweet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NewTweetRequest request = new NewTweetRequest();
-                request.setStatus(etStatus.getText().toString());
-
-                TwitterClient client = TwitterApplication.getRestClient();
-                client.postNewTweet(request, new NewPostTweetCallback() {
-                    @Override
-                    public void onSuccess(Tweet tweet) {
-                        mListener.onTimeLineChanged(tweet);
-                        dismiss();
-                    }
-
-                    @Override
-                    public void onError(Error error) {
-
-                    }
-
-                });
+                sendTweet();
             }
             });
 
 
     }
 
+    private void sendTweet () {
+        NewTweetRequest request = new NewTweetRequest();
+        request.setStatus(etStatus.getText().toString());
+
+        TwitterClient client = TwitterApplication.getRestClient();
+        client.postNewTweet(request, new NewPostTweetCallback() {
+            @Override
+            public void onSuccess(Tweet tweet) {
+                mListener.onTimeLineChanged(tweet);
+                dismiss();
+            }
+
+            @Override
+            public void onError(Error error) {
+
+            }
+
+        });
+
+    }
+
     private void enableTweetButton() {
         btnComposeNewTweet.setEnabled(mStatus != null && mStatus.length() > 0);
+        if (etStatus.getText().toString().isEmpty()) {
+            btnComposeNewTweet.setEnabled(false);
+            btnComposeNewTweet.setBackgroundColor(getResources().getColor(R.color.blue));
+
+        }
+
     }
 
     private void updateCounter() {

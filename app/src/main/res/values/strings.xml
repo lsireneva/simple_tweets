@@ -7,5 +7,6 @@
     <string name="intent_host">cprest</string>
     <string name="tweet">Tweet</string>
     <string name="tweet_limit">140</string>
+    <string name="in_reply_to">In reply to %1$s</string>
 
 </resources>
